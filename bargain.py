@@ -142,10 +142,12 @@ class Agent:
             reasonable_bid_space - list of reasonable bids
         '''
 
-        offered_price = proposed_offer["Cost"]
-
-        # offered_price - (prev_offer["Cost"] - offered_price)
         max_cost = int(prev_offer["Cost"])
+        if not np.array_equal(sorted(prev_offer["Bundle"]), sorted(proposed_offer["Bundle"])):
+            max_cost = int(self.getInitialOffer(proposed_offer["Bundle"], recommender)["Cost"])
+
+        offered_price = proposed_offer["Cost"]
+        # offered_price - (max_cost - offered_price)
         start_offer_price = max(0, 2*offered_price - max_cost)
         bid_space = []
         for price in range(start_offer_price, max_cost+1):
@@ -168,19 +170,22 @@ class Agent:
         bid_space_mean_utility = np.mean(bid_space_utility_list)
 
         if self.utility(prev_offer, recommender) <= proposed_offer_utility:
+            print("1111s")
             new_offer["Bundle"] = proposed_offer["Bundle"]
             new_offer["Cost"] = proposed_offer["Cost"]
             new_offer["Accepted"] = True
 
         elif prev_mean_utility <= proposed_offer_utility:
+            print("2222s")
             new_offer["Bundle"] = proposed_offer["Bundle"]
             new_offer["Cost"] = proposed_offer["Cost"]
             new_offer["Accepted"] = True
 
-        elif bid_space_mean_utility <= proposed_offer_utility:
-            new_offer["Bundle"] = proposed_offer["Bundle"]
-            new_offer["Cost"] = proposed_offer["Cost"]
-            new_offer["Accepted"] = True
+        # elif bid_space_mean_utility <= proposed_offer_utility:
+        #     print("3333s")
+        #     new_offer["Bundle"] = proposed_offer["Bundle"]
+        #     new_offer["Cost"] = proposed_offer["Cost"]
+        #     new_offer["Accepted"] = True
 
         else:
             min_difference_utility = math.inf
@@ -260,7 +265,7 @@ class RecommenderSystem:
 
         return pos
 
-    def getListOfPossibleItems(product_idx):
+    def getListOfPossibleItems(self, product_idx):
            recommendations = np.argsort(cooccurance_matrix[product_idx])[::-1]
            return recommendations[1:3]
 
@@ -341,8 +346,8 @@ def getOffer(agent, buyer, recommender, selling_price, product_list, proposed_of
     # prev_offer is None when negotiation has not begun
     if  not prev_offer:
         product_idx = proposed_offer["Bundle"][-1]
-        initial_item_idx = recommender.getInitialBundleRecommendation(product_idx)
-        initial_offer = agent.getInitialOffer([initial_item_idx, product_idx], recommender)
+        initial_item_idx = recommender.getListOfPossibleItems(product_idx)
+        initial_offer = agent.getInitialOffer(np.append(initial_item_idx, product_idx), recommender)
         return initial_offer
 
     else:
@@ -396,19 +401,16 @@ def negotiation(agent, buyer, cooccurance_matrix, product_list, selling_price, p
                     reject = True
                     break
                 elif inp == 3:
-                    possible_items_idx = recommender.getListOfPossibleItems(product_list, product_idx)
+                    possible_items_idx = recommender.getListOfPossibleItems(product_idx)
+                    print(product_list[product_idx], " Price => Rs.", selling_price[product_list[product_idx]])
                     print("Possible items : ")
                     for i in range(len(possible_items_idx)):
-                        print(i, " : ", product_list[possible_items_idx[i]])
+                        print(i+1, " : ", product_list[possible_items_idx[i]], " Price => Rs.", selling_price[product_list[possible_items_idx[i]]])
                     proposed_item_idx = input("Enter new items: number between 1 and %d(other than product index): " % len(possible_items_idx))
-                    proposed_item_idx = [possible_items_idx(int(i))-1 for i in proposed_item_idx.split(" ")]
-                    # proposed_item_idx -= 1
-                    # while product_idx in proposed:
-                    #     proposed_item_idx = int(input("Entered same product. Enter a new item: number between 1 and %d(other than product index): " % len(product_list)))
-                    #     proposed_item_idx -= 1
+                    proposed_item_idx = [possible_items_idx[int(i)-1] for i in proposed_item_idx.split(" ")]
 
                     proposed_cost = int(input("Enter cost of the new bundle: "))
-                    proposed_offer["Bundle"] = [proposed_item_idx, product_idx]
+                    proposed_offer["Bundle"] = np.append(proposed_item_idx, product_idx)
                     proposed_offer["Cost"] = proposed_cost
                     break
                 else:
