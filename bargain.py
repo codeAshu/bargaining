@@ -5,7 +5,7 @@ import pickle
 import math
 
 class Agent:
-    def __init__(self, product_list, cost_price, selling_price, max_initial_discount_rate = 0.2, min_profit_margin = 0.3, num_rounds = 10):
+    def __init__(self, product_list, cost_price, selling_price, max_initial_discount_rate = 0.2, min_profit_margin = 0.3, num_rounds = 0.6):
         self.first_offer_value = -1
         self.product_list = product_list
         self.cost_price = cost_price
@@ -15,7 +15,7 @@ class Agent:
         self.prev_agent_offers_utility_list = []
         self.rounds = num_rounds
         self.time = 0
-        self.alpha = 0.3
+        self.alpha = 0.4
         self.max_initial_discount_rate = max_initial_discount_rate
         self.min_agent_utility = 1
         self.min_profit_margin = min_profit_margin
@@ -51,10 +51,7 @@ class Agent:
             prior_utility += recommender.cooccurance_matrix[product_idx][i] / recommender.cooccurance_matrix[product_idx][product_idx]
 
         prior_utility /= (len(proposed_offer["Bundle"])-1)
-        print("CRBU", current_bid_utility)
-        print("prior", prior_utility)
         lr = self.time**(-2.2)
-        print("lr", lr)
         buyer_utility = (1 - lr) * current_bid_utility + lr * prior_utility
 
         return buyer_utility
@@ -103,7 +100,7 @@ class Agent:
         '''
 
         if len(self.buyer_utility_list) == 0:
-            target_utility = self.min_agent_utility + (1-self.min_agent_utility) * (1 - buyer_utility * (self.time / self.rounds) ** (1 / self.alpha))
+            target_utility = self.min_agent_utility + (1-self.min_agent_utility) * (1 - buyer_utility * min(self.rounds + self.time * 0.1, 1) ** (1 / self.alpha))
             self.time += 1
             self.buyer_utility_list.append(buyer_utility)
             return target_utility
@@ -127,15 +124,17 @@ class Agent:
             else:
                 assertiveness = "assertive"
 
-            if (cooperativeness == "neutral" and assertiveness == "neutral") \
-                    or (cooperativeness == "cooperative" and assertiveness == "passive"):
+            if (cooperativeness == "cooperative" and assertiveness == "passive"):
                 if self.alpha < 1:
-                    self.alpha += 0.25
+                    self.alpha += 0.15
+
+            elif (cooperativeness == "neutral" and assertiveness == "neutral"):
+                self.alpha -= 0.05
             else:
                 if self.alpha > 0.3:
-                    self.alpha -= 0.2
+                    self.alpha -= 0.25
 
-            target_utility = self.min_agent_utility + (1-self.min_agent_utility) * (1 - buyer_utility * (self.time / self.rounds) ** (1 / self.alpha))
+            target_utility = self.min_agent_utility + (1-self.min_agent_utility) * (1 - buyer_utility * min(self.rounds + self.time * 0.05, 1) ** (1 / self.alpha))
 
             self.time += 1
             self.buyer_utility_list.append(buyer_utility)
@@ -176,29 +175,25 @@ class Agent:
         return bid_space
 
     def acceptanceModel(self, bid_space, proposed_offer, target_utility, recommender, agent_utility):
-        prev_offer = self.prev_agent_offers_list[-1]
+        prev_offer_utility = self.prev_agent_offers_utility_list[-1]
         new_offer = {}
-        proposed_offer_utility = agent_utility
         prev_mean_utility = np.mean(self.prev_agent_offers_utility_list)
         bid_space_utility_list = [self.utility(offer, recommender) for offer in bid_space]
-        bid_space_mean_utility = np.mean(bid_space_utility_list)
 
-        if self.utility(prev_offer, recommender) <= proposed_offer_utility:
+        if prev_offer_utility <= agent_utility:
             new_offer["Bundle"] = proposed_offer["Bundle"]
             new_offer["Cost"] = proposed_offer["Cost"]
             new_offer["Accepted"] = True
 
-        elif prev_mean_utility <= proposed_offer_utility:
-            print("2222s")
+        elif prev_mean_utility <= agent_utility:
             new_offer["Bundle"] = proposed_offer["Bundle"]
             new_offer["Cost"] = proposed_offer["Cost"]
             new_offer["Accepted"] = True
 
-        # elif bid_space_mean_utility <= proposed_offer_utility:
-        #     print("3333s")
-        #     new_offer["Bundle"] = proposed_offer["Bundle"]
-        #     new_offer["Cost"] = proposed_offer["Cost"]
-        #     new_offer["Accepted"] = True
+        elif target_utility <= agent_utility:
+            new_offer["Bundle"] = proposed_offer["Bundle"]
+            new_offer["Cost"] = proposed_offer["Cost"]
+            new_offer["Accepted"] = True
 
         else:
             min_difference_utility = math.inf
@@ -207,6 +202,7 @@ class Agent:
                     new_offer["Bundle"] = bid_space[idx]["Bundle"]
                     new_offer["Cost"] = bid_space[idx]["Cost"]
                     new_offer["Accepted"] = False
+                    min_difference_utility = abs(target_utility - bid_space_utility_list[idx])
 
         return new_offer
 
