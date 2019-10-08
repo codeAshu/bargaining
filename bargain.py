@@ -5,18 +5,20 @@ import pickle
 import math
 
 class Agent:
-    def __init__(self, product_list, cost_price, selling_price, max_initial_discount_rate = 0.2, min_agent_utility = 0.3, num_rounds = 10):
+    def __init__(self, product_list, cost_price, selling_price, max_initial_discount_rate = 0.2, min_profit_margin = 0.3, num_rounds = 10):
         self.first_offer_value = -1
         self.product_list = product_list
         self.cost_price = cost_price
         self.selling_price = selling_price
         self.buyer_utility_list = []
         self.prev_agent_offers_list = []
+        self.prev_agent_offers_utility_list = []
         self.rounds = num_rounds
         self.time = 0
         self.alpha = 0.3
         self.max_initial_discount_rate = max_initial_discount_rate
-        self.min_agent_utility = min_agent_utility
+        self.min_agent_utility = 1
+        self.min_profit_margin = min_profit_margin
 
     def opponentModel(self, proposed_offer, recommender):
 
@@ -49,8 +51,10 @@ class Agent:
             prior_utility += recommender.cooccurance_matrix[product_idx][i] / recommender.cooccurance_matrix[product_idx][product_idx]
 
         prior_utility /= (len(proposed_offer["Bundle"])-1)
-
+        print("CRBU", current_bid_utility)
+        print("prior", prior_utility)
         lr = self.time**(-2.2)
+        print("lr", lr)
         buyer_utility = (1 - lr) * current_bid_utility + lr * prior_utility
 
         return buyer_utility
@@ -77,7 +81,12 @@ class Agent:
         for i in proposed_offer["Bundle"]:
             total_cost_price += self.cost_price[self.product_list[i]]
 
-        agent_utility = (total_offered_price - total_cost_price)/ (total_selling_price - total_cost_price)
+        profit = total_offered_price - total_cost_price
+        max_profit = total_selling_price - total_cost_price
+        agent_utility = profit / max_profit
+
+        initial_profit = self.selling_price[self.product_list[product_idx]] - self.cost_price[self.product_list[product_idx]]
+        self.min_agent_utility = (initial_profit + self.min_profit_margin*(max_profit - initial_profit)) / max_profit
         return agent_utility
 
     def TKI(self, buyer_utility, agent_utility):
@@ -94,7 +103,9 @@ class Agent:
         '''
 
         if len(self.buyer_utility_list) == 0:
-            target_utility = self.min_agent_utility + (1-self.min_agent_utility) * (1 - buyer_utility * (self.alpha))
+            target_utility = self.min_agent_utility + (1-self.min_agent_utility) * (1 - buyer_utility * (self.time / self.rounds) ** (1 / self.alpha))
+            self.time += 1
+            self.buyer_utility_list.append(buyer_utility)
             return target_utility
         else:
             mean_buyer_utility = np.mean(self.buyer_utility_list)
@@ -118,8 +129,11 @@ class Agent:
 
             if (cooperativeness == "neutral" and assertiveness == "neutral") \
                     or (cooperativeness == "cooperative" and assertiveness == "passive"):
-                if  self.alpha < 1:
-                    self.alpha += 0.1
+                if self.alpha < 1:
+                    self.alpha += 0.25
+            else:
+                if self.alpha > 0.3:
+                    self.alpha -= 0.2
 
             target_utility = self.min_agent_utility + (1-self.min_agent_utility) * (1 - buyer_utility * (self.time / self.rounds) ** (1 / self.alpha))
 
@@ -161,16 +175,15 @@ class Agent:
 
         return bid_space
 
-    def acceptanceModel(self, bid_space, proposed_offer, target_utility, recommender):
+    def acceptanceModel(self, bid_space, proposed_offer, target_utility, recommender, agent_utility):
         prev_offer = self.prev_agent_offers_list[-1]
         new_offer = {}
-        proposed_offer_utility = self.utility(proposed_offer, recommender)
-        prev_mean_utility = np.mean([self.utility(offer, recommender) for offer in self.prev_agent_offers_list])
+        proposed_offer_utility = agent_utility
+        prev_mean_utility = np.mean(self.prev_agent_offers_utility_list)
         bid_space_utility_list = [self.utility(offer, recommender) for offer in bid_space]
         bid_space_mean_utility = np.mean(bid_space_utility_list)
 
         if self.utility(prev_offer, recommender) <= proposed_offer_utility:
-            print("1111s")
             new_offer["Bundle"] = proposed_offer["Bundle"]
             new_offer["Cost"] = proposed_offer["Cost"]
             new_offer["Accepted"] = True
@@ -348,16 +361,21 @@ def getOffer(agent, buyer, recommender, selling_price, product_list, proposed_of
         product_idx = proposed_offer["Bundle"][-1]
         initial_item_idx = recommender.getListOfPossibleItems(product_idx)
         initial_offer = agent.getInitialOffer(np.append(initial_item_idx, product_idx), recommender)
+        agent.prev_agent_offers_utility_list.append(agent.utility(initial_offer, recommender))
         return initial_offer
 
     else:
         agent.prev_agent_offers_list.append(prev_offer)
-        buyer_utility = agent.opponentModel(proposed_offer, recommender)
+        buyer_utility = min(1, agent.opponentModel(proposed_offer, recommender))
         agent_utility = agent.utility(proposed_offer, recommender)
+        print("Agent Utility : ", agent_utility)
+        print("Buyer Utility : ", buyer_utility)
         # Use the TKI method from Koley's/Fujita's paper to provide a new offer
         target_utility = agent.TKI(buyer_utility, agent_utility)
+        print("Target Utility : ", target_utility)
         bid_space = agent.getBidSpace(proposed_offer, target_utility, recommender, prev_offer)
-        new_offer = agent.acceptanceModel(bid_space, proposed_offer, target_utility, recommender)
+        new_offer = agent.acceptanceModel(bid_space, proposed_offer, target_utility, recommender, agent_utility)
+        agent.prev_agent_offers_utility_list.append(agent.utility(new_offer, recommender))
         return new_offer
 
 def negotiation(agent, buyer, cooccurance_matrix, product_list, selling_price, product_idx):
@@ -421,6 +439,6 @@ def negotiation(agent, buyer, cooccurance_matrix, product_list, selling_price, p
 if __name__ == "__main__":
     product_list, selling_price, cost_price, cooccurance_matrix = getData()
     product_name, product_idx = getProduct(product_list)
-    agent = Agent(product_list, cost_price, selling_price, max_initial_discount_rate=0.3, min_agent_utility = 0.3)
+    agent = Agent(product_list, cost_price, selling_price, max_initial_discount_rate=0.3, min_profit_margin = 0.3)
     buyer = Buyer(len(product_list))
     negotiation(agent, buyer, cooccurance_matrix, product_list, selling_price, product_idx)
