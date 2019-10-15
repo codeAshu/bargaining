@@ -386,63 +386,63 @@ def getOffer(agent, buyer, recommender, selling_price, product_list, proposed_of
         agent.prev_agent_offers_utility_list.append(agent.utility(new_offer, recommender))
         return new_offer
 
-# def negotiation2(agent, buyer, cooccurance_matrix, product_list, selling_price, product_idx):
-#
-#     '''
-#     The logic of the negotiation and its flow
-#
-#     Parameters:
-#         agent               - the agent participating in the negotiation
-#         buyer               - the buyer participating in the negotiation
-#         cooccurance_matrix  - the cooccurance matrix of the recommendation system
-#         product_list        - list of the entire product base
-#         selling_price       - list with the selling price of the entire product base
-#         product_idx         - index of the product that the buyer wishes to buy
-#
-#     Returns:
-#         None
-#     '''
-#
-#     recommender = RecommenderSystem(cooccurance_matrix)
-#     offer = None
-#     proposed_offer = {"Bundle" : [product_idx], "Cost" : None}
-#     accept = False
-#     reject = False
-#     while not accept and not reject:
-#         offer = getOffer(agent, buyer, recommender, selling_price, product_list, proposed_offer, offer)
-#         bundle_idx = offer["Bundle"][:-1]
-#         if offer["Accepted"]:
-#             print("Accepted. Proceeding to payment with %s and %s" % (product_list[product_idx], ", ".join([product_list[idx] for idx in bundle_idx])))
-#             accept = True
-#         else:
-#             printMenu(product_list, product_idx, bundle_idx, offer, selling_price)
-#             while True:
-#                 inp = int(input("\nType -> 1 : Accept, 2 : Reject, 3 : New offer\n"))
-#                 if inp == 1:
-#                     print("Thank You. Proceeding to payment with %s and %s" % (product_list[product_idx], ", ".join([product_list[idx] for idx in bundle_idx])))
-#                     accept = True
-#                     break
-#                 elif inp == 2:
-#                     print("Proceeding to payment with only %s" % (product_list[product_idx]))
-#                     reject = True
-#                     break
-#                 elif inp == 3:
-#                     possible_items_idx = recommender.getListOfPossibleItems(product_idx)
-#                     print(product_list[product_idx], " Price => Rs.", selling_price[product_list[product_idx]])
-#                     print("Possible items : ")
-#                     for i in range(len(possible_items_idx)):
-#                         print(i+1, " : ", product_list[possible_items_idx[i]], " Price => Rs.", selling_price[product_list[possible_items_idx[i]]])
-#                     proposed_item_idx = input("Enter new items: number between 1 and %d(other than product index): " % len(possible_items_idx))
-#                     proposed_item_idx = [possible_items_idx[int(i)-1] for i in proposed_item_idx.split(" ")]
-#
-#                     proposed_cost = int(input("Enter cost of the new bundle: "))
-#                     proposed_offer["Bundle"] = np.append(proposed_item_idx, product_idx)
-#                     proposed_offer["Cost"] = proposed_cost
-#                     break
-#                 else:
-#                     print("Wrong option. Please choose again.")
-#
-#         first_offer = False
+def negotiation2(agent, buyer, cooccurance_matrix, product_list, selling_price, product_idx):
+
+    '''
+    The logic of the negotiation and its flow
+
+    Parameters:
+        agent               - the agent participating in the negotiation
+        buyer               - the buyer participating in the negotiation
+        cooccurance_matrix  - the cooccurance matrix of the recommendation system
+        product_list        - list of the entire product base
+        selling_price       - list with the selling price of the entire product base
+        product_idx         - index of the product that the buyer wishes to buy
+
+    Returns:
+        None
+    '''
+
+    recommender = RecommenderSystem(cooccurance_matrix)
+    offer = None
+    proposed_offer = {"Bundle" : [product_idx], "Cost" : None}
+    accept = False
+    reject = False
+    while not accept and not reject:
+        offer = getOffer(agent, buyer, recommender, selling_price, product_list, proposed_offer, offer)
+        bundle_idx = offer["Bundle"][:-1]
+        if offer["Accepted"]:
+            print("Accepted. Proceeding to payment with %s and %s" % (product_list[product_idx], ", ".join([product_list[idx] for idx in bundle_idx])))
+            accept = True
+        else:
+            printMenu(product_list, product_idx, bundle_idx, offer, selling_price)
+            while True:
+                inp = int(input("\nType -> 1 : Accept, 2 : Reject, 3 : New offer\n"))
+                if inp == 1:
+                    print("Thank You. Proceeding to payment with %s and %s" % (product_list[product_idx], ", ".join([product_list[idx] for idx in bundle_idx])))
+                    accept = True
+                    break
+                elif inp == 2:
+                    print("Proceeding to payment with only %s" % (product_list[product_idx]))
+                    reject = True
+                    break
+                elif inp == 3:
+                    possible_items_idx = recommender.getListOfPossibleItems(product_idx)
+                    print(product_list[product_idx], " Price => Rs.", selling_price[product_list[product_idx]])
+                    print("Possible items : ")
+                    for i in range(len(possible_items_idx)):
+                        print(i+1, " : ", product_list[possible_items_idx[i]], " Price => Rs.", selling_price[product_list[possible_items_idx[i]]])
+                    proposed_item_idx = input("Enter new items: number between 1 and %d(other than product index): " % len(possible_items_idx))
+                    proposed_item_idx = [possible_items_idx[int(i)-1] for i in proposed_item_idx.split(" ")]
+
+                    proposed_cost = int(input("Enter cost of the new bundle: "))
+                    proposed_offer["Bundle"] = np.append(proposed_item_idx, product_idx)
+                    proposed_offer["Cost"] = proposed_cost
+                    break
+                else:
+                    print("Wrong option. Please choose again.")
+
+        first_offer = False
 
 def negotiation(agent, buyer, cooccurance_matrix, product_list, selling_price, product_idx, offer, proposed_offer):
 

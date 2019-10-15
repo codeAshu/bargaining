@@ -36,6 +36,7 @@ def rest_negotiate(product_name):
     idx.append(bg.getProductIndex(product_list,product_name)[0])
     recommender = bg.RecommenderSystem(cooccurance_matrix)
     proposed_offer = {"Bundle" : idx, "Cost" : int(request.form['cost'])}
+    print(int(request.form['cost']))
     offer = bg.negotiation(agent, buyer, cooccurance_matrix, product_list, selling_price, idx, offer, proposed_offer)
     bundle_idx = offer["Bundle"][:-1]
     if offer["Accepted"]:
