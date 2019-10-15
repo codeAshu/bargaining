@@ -15,8 +15,8 @@
         along with {{product_list[product_idx]}} at a cost of Rs.{{ offer["Cost"] }}<br><br>
         Total amount saved : Rs.{{amount_saved}}
         <br><br>
-        <h4><a href="/accept/{{product_names}}/{{ offer['Cost'] }}/1">Accept</a></h4>
-        <h4><a href="/accept/{{product_names}}/{{ offer['Cost'] }}/0">Reject</a></h4>
+        <h4><a href="/accept/{{product_names}}/1">Accept</a></h4>
+        <h4><a href="/accept/{{product_names}}/0">Reject</a></h4>
         <h4>New Offer : </h4>
         <div class="form">
         <form action="/negotiate/{{product_list[offer['Bundle'][-1]]}}" method="POST">

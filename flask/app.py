@@ -46,8 +46,8 @@ def rest_negotiate(product_name):
         amount_saved = selling_price[product_list[product_idx]] + sum([selling_price[product_list[i]] for i in bundle_idx]) - offer["Cost"]
         return render_template('negotiate.html', product_list=product_list, selling_price=selling_price, amount_saved=amount_saved, offer=offer, possible_items = recommender.getListOfPossibleItems(product_idx), product_names=','.join([product_list[i] for i in offer['Bundle']]))
 
-@app.route('/accept/<string:product_names>/<float:cost>/<int:accept>')
-def accept(product_names, cost, accept):
+@app.route('/accept/<string:product_names>/<int:accept>')
+def accept(product_names, accept):
     indices = bg.getProductIndex(product_list, product_names)
     bundle_idx = indices[:-1]
     product_idx = indices[-1]
