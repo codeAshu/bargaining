@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Bargain</title>
+{% endblock %}
+
+{% block body %}
+<div class="content">
+    <h1 style="text-align: Center">Products Available</h1>
+        <b>Price of {{product_list[offer['Bundle'][-1]]}} : {{selling_price[product_list[offer['Bundle'][-1]]]}}<br><br>
+        People who buy {{product_list[offer['Bundle'][-1]]}} also buy
+        {% for idx in offer['Bundle'][:-1] %} {{product_list[idx]}}{% endfor %}<br><br>
+        Offer :
+        {% for idx in offer['Bundle'][:-1] %} {{product_list[idx]}}{% endfor %}
+        along with {{product_list[product_idx]}} at a cost of Rs.{{ offer["Cost"] }}<br><br>
+        Total amount saved : Rs.{{amount_saved}}
+        <br><br>
+        <h4><a href="/accept/{{product_names}}/{{ offer['Cost'] }}/1">Accept</a></h4>
+        <h4><a href="/accept/{{product_names}}/{{ offer['Cost'] }}/0">Reject</a></h4>
+        <h4>New Offer : </h4>
+        <div class="form">
+        <form action="/negotiate/{{product_list[offer['Bundle'][-1]]}}" method="POST">
+          {% for idx in possible_items %}
+              <input type="checkbox" id={{idx}} name={{idx}}>
+              <label for={{idx}}>{{product_list[idx]}}  (Rs.{{selling_price[product_list[idx]]}})</label>
+              <br>
+          {% endfor %}
+          <br>
+            <input type="number" name="cost" id="cost">
+            <input type="submit" value="Make Offer">
+        </form>
+    </div>
+</div>
+{% endblock %}

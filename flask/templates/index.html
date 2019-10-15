@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Bargain</title>
+{% endblock %}
+
+{% block body %}
+<div class="content">
+    <h1 style="text-align: Center">Products Available</h1>
+    <table>
+        <tr>
+            <th>Products</th>
+            <th>Price</th>
+            <th>Select</th>
+        </tr>
+        {% for product in product_list %}
+            <tr>
+                <td>{{ product }} </td>
+                <td>{{ selling_price[ product ] }}</td>
+                <td>
+                    <a href="/first_negotiate/{{product}}">Select</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+
+</div>
+{% endblock %}
