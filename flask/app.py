@@ -26,7 +26,7 @@ def first_negotiate(product_name):
     else:
         product_idx = offer["Bundle"][-1]
         amount_saved = selling_price[product_list[product_idx]] + sum([selling_price[product_list[i]] for i in bundle_idx]) - offer["Cost"]
-        return render_template('negotiate.html', product_list=product_list, selling_price=selling_price, amount_saved=amount_saved, offer=offer, possible_items = recommender.getListOfPossibleItems(product_idx), product_names=','.join([product_list[i] for i in offer['Bundle']]))
+        return render_template('negotiate.html', product_list=product_list, product_idx=product_idx, selling_price=selling_price, amount_saved=amount_saved, offer=offer, possible_items = recommender.getListOfPossibleItems(product_idx), product_names=','.join([product_list[i] for i in offer['Bundle']]))
 
 @app.route('/negotiate/<string:product_name>', methods=['POST'])
 def rest_negotiate(product_name):
@@ -45,7 +45,7 @@ def rest_negotiate(product_name):
     else:
         product_idx = offer["Bundle"][-1]
         amount_saved = selling_price[product_list[product_idx]] + sum([selling_price[product_list[i]] for i in bundle_idx]) - offer["Cost"]
-        return render_template('negotiate.html', product_list=product_list, selling_price=selling_price, amount_saved=amount_saved, offer=offer, possible_items = recommender.getListOfPossibleItems(product_idx), product_names=','.join([product_list[i] for i in offer['Bundle']]))
+        return render_template('negotiate.html', product_list=product_list, product_idx=product_idx, selling_price=selling_price, amount_saved=amount_saved, offer=offer, possible_items = recommender.getListOfPossibleItems(product_idx), product_names=','.join([product_list[i] for i in offer['Bundle']]))
 
 @app.route('/accept/<string:product_names>/<int:accept>')
 def accept(product_names, accept):
