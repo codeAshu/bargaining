@@ -22,7 +22,10 @@ def first_negotiate(product_name):
     bundle_idx = offer["Bundle"][:-1]
     if offer["Accepted"]:
         product_idx = offer["Bundle"][-1]
-        return "Accepted. Proceeding to payment for " + product_list[product_idx] + " along with " + ", ".join([product_list[idx] for idx in bundle_idx])
+        total_selling_price = 0
+        for i in offer["Bundle"]:
+            total_selling_price += selling_price[product_list[i]]
+        return render_template('accept.html', product_list=product_list, product_idx=idx, product_names=','.join([product_list[idx] for idx in bundle_idx]), amount_saved=total_selling_price - offer["Cost"], cost=offer["Cost"])
     else:
         product_idx = offer["Bundle"][-1]
         amount_saved = selling_price[product_list[product_idx]] + sum([selling_price[product_list[i]] for i in bundle_idx]) - offer["Cost"]
@@ -41,21 +44,24 @@ def rest_negotiate(product_name):
     bundle_idx = offer["Bundle"][:-1]
     if offer["Accepted"]:
         product_idx = offer["Bundle"][-1]
-        return "Accepted. Proceeding to payment for " + product_list[product_idx] + " along with " + ", ".join([product_list[idx] for idx in bundle_idx])
+        total_selling_price = 0
+        for i in offer["Bundle"]:
+            total_selling_price += selling_price[product_list[i]]
+        return render_template('accept.html', product_list=product_list, product_idx=product_idx, product_names=','.join([product_list[idx] for idx in bundle_idx]), amount_saved=total_selling_price - offer["Cost"], cost=offer["Cost"])
     else:
         product_idx = offer["Bundle"][-1]
         amount_saved = selling_price[product_list[product_idx]] + sum([selling_price[product_list[i]] for i in bundle_idx]) - offer["Cost"]
         return render_template('negotiate.html', product_list=product_list, product_idx=product_idx, selling_price=selling_price, amount_saved=amount_saved, offer=offer, possible_items = recommender.getListOfPossibleItems(product_idx), product_names=','.join([product_list[i] for i in offer['Bundle']]))
 
-@app.route('/accept/<string:product_names>/<int:accept>')
-def accept(product_names, accept):
+@app.route('/accept/<string:product_names>/<int:accept>/<float:cost>/<float:amount_saved>')
+def accept(product_names, accept, cost, amount_saved):
     indices = bg.getProductIndex(product_list, product_names)
     bundle_idx = indices[:-1]
     product_idx = indices[-1]
-    if accept == 1:
-        return "Accepted. Proceeding to payment for " + product_list[product_idx] + " along with " + ", ".join([product_list[idx] for idx in bundle_idx])
+    if accept:
+        return render_template('accept.html', product_list=product_list, product_idx=product_idx, product_names=','.join([product_list[idx] for idx in bundle_idx]), amount_saved=amount_saved, cost=cost)
     else:
-        return "Proceeding to payment with only " + product_list[product_idx]
+        return render_template('reject.html', product=product_list[product_idx], cost=selling_price[product_list[product_idx]])
 
 if __name__ == "__main__":
     app.run(debug=True)

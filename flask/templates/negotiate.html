@@ -21,8 +21,8 @@
         Total amount saved : <b>Rs. {{ amount_saved }}</b>
     </div><br>
     <div class="btn-group" style="width:100%">
-        <button onclick="window.location.href='/accept/{{product_names}}/1'" style="width:50%">Accept</button>
-        <button onclick="window.location.href='/accept/{{product_names}}/0'" style="width:50%">Reject</button>
+        <button onclick="window.location.href='/accept/{{ product_names }}/1/{{ offer['Cost'] }}/{{ amount_saved }}'" style="width:50%">Accept</button>
+        <button onclick="window.location.href='/accept/{{ product_list[offer['Bundle'][-1]] }}/0/0.0/0.0'" style="width:50%">Reject</button>
     </div><br><br>
     <h2>New Offer : </h2>
     <div class="form">
