@@ -11,14 +11,14 @@
         <tr>
             <th>Products</th>
             <th>Price</th>
-            <th>Select</th>
+            <th></th>
         </tr>
         {% for product in product_list %}
             <tr>
                 <td>{{ product }} </td>
                 <td>{{ selling_price[ product ] }}</td>
                 <td>
-                    <a href="/first_negotiate/{{product}}">Select</a>
+                    <a href="/first_negotiate/{{product}}">Buy</a>
                 </td>
             </tr>
         {% endfor %}
