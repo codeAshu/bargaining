@@ -6,19 +6,20 @@
 
 {% block body %}
 <div class="content">
-    <h1 style="text-align: Center">Products Available</h1>
+    <h1>Products Available</h1>
     <table>
         <tr>
             <th>Products</th>
-            <th>Price</th>
-            <th></th>
+
+            <th>Price in Rs.</th>
+            <th> </th>
         </tr>
         {% for product in product_list %}
             <tr>
                 <td>{{ product }} </td>
                 <td>{{ selling_price[ product ] }}</td>
                 <td>
-                    <a href="/first_negotiate/{{product}}">Buy</a>
+                    <a href="/first_negotiate/{{product}}">Buy Now!</a>
                 </td>
             </tr>
         {% endfor %}

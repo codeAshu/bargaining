@@ -50,7 +50,7 @@ class Agent:
         for i in proposed_offer["Bundle"][:-1]:
             prior_utility += recommender.cooccurance_matrix[product_idx][i] / recommender.cooccurance_matrix[product_idx][product_idx]
 
-        prior_utility /= (len(proposed_offer["Bundle"])-1)
+        prior_utility /= (len(proposed_offer["Bundle"]) - 1)
         lr = self.time**(-2.2)
         buyer_utility = (1 - lr) * current_bid_utility + lr * prior_utility
 

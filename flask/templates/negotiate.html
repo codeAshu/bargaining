@@ -6,29 +6,63 @@
 
 {% block body %}
 <div class="content">
-    <h1 style="text-align: Center">Products Available</h1>
-        <b>Price of {{product_list[offer['Bundle'][-1]]}} : {{selling_price[product_list[offer['Bundle'][-1]]]}}<br><br>
-        People who buy {{product_list[offer['Bundle'][-1]]}} also buy
-        {% for idx in offer['Bundle'][:-1] %} {{product_list[idx]}}{% endfor %}<br><br>
-        Offer :
-        {% for idx in offer['Bundle'][:-1] %} {{product_list[idx]}}{% endfor %}
-        along with {{product_list[product_idx]}} at a cost of Rs.{{ offer["Cost"] }}<br><br>
-        Total amount saved : Rs.{{amount_saved}}
-        <br><br>
-        <h4><a href="/accept/{{product_names}}/1">Accept</a></h4>
-        <h4><a href="/accept/{{product_names}}/0">Reject</a></h4>
-        <h4>New Offer : </h4>
-        <div class="form">
-        <form action="/negotiate/{{product_list[offer['Bundle'][-1]]}}" method="POST">
-          {% for idx in possible_items %}
-              <input type="checkbox" id={{idx}} name={{idx}}>
-              <label for={{idx}}>{{product_list[idx]}}  (Rs.{{selling_price[product_list[idx]]}})</label>
-              <br>
-          {% endfor %}
-          <br>
-            <input type="number" name="cost" id="cost">
-            <input type="submit" value="Make Offer">
-        </form>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 col-md-6 col-sm-12">
+                <h1>Bargain</h1>
+                Price of {{product_list[offer['Bundle'][-1]]}} : <b>Rs. {{ selling_price[product_list[offer['Bundle'][-1]]] }}</b><br><br>
+                People who buy {{product_list[offer['Bundle'][-1]]}} also buy
+                <ol>
+                {% for idx in offer['Bundle'][:-1] %}
+                    <li>{{product_list[idx]}}</li>
+                {% endfor %}
+                </ol>
+                <div class="offer">
+                    Offer:<br>
+                    {% for idx in offer['Bundle'][:-1] %} {{ product_list[idx] }}, {% endfor %}
+                    along with {{ product_list[product_idx] }} at a cost of <b>Rs.{{ offer["Cost"] }}</b></b><br><br>
+                    Total amount saved : <b>Rs. {{ amount_saved }}</b>
+                </div><br>
+                <div class="btn-group" style="width:100%">
+                    <button onclick="window.location.href='/accept/{{ product_names }}/1/{{ offer['Cost'] }}/{{ amount_saved }}'" style="width:50%">Accept</button>
+                    <button onclick="window.location.href='/accept/{{ product_list[offer['Bundle'][-1]] }}/0/0.0/0.0'" style="width:50%">Reject</button>
+                </div><br><br>
+                <h2>New Offer : </h2>
+                <div class="form">
+                    <form action="/negotiate/{{product_list[offer['Bundle'][-1]]}}" method="POST">
+                    {% for idx in possible_items %}
+                        <input type="checkbox" id={{idx}} name={{idx}}>
+                        <label for={{idx}}>{{product_list[idx]}}  (Rs.{{selling_price[product_list[idx]]}})</label>
+                        <br>
+                    {% endfor %}
+                    <br>
+                        <input type="number" name="cost" id="cost">
+                        <input type="submit" value="Make Offer">
+                    </form>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-6 col-sm-12">
+                <h1>Offer History</h1>
+                <ol>
+                {% for i in range(0, offer_history|count - 1, 2) %}
+                    <li>Agent - {{ offer_history[i]["Cost"] }} - 
+                        <ul>
+                            {% for idx in offer_history[i]['Bundle'] %}
+                                <li>{{ product_list[idx] }}</li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    <li>You - {{ offer_history[i+1]["Cost"] }} - 
+                        <ul>
+                            {% for idx in offer_history[i+1]['Bundle'] %}
+                                <li>{{ product_list[idx] }}</li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% endfor %}
+                </ol>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
