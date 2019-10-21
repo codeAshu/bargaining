@@ -50,7 +50,8 @@ class Agent:
         for i in proposed_offer["Bundle"][:-1]:
             prior_utility += recommender.cooccurance_matrix[product_idx][i] / recommender.cooccurance_matrix[product_idx][product_idx]
 
-        prior_utility /= (len(proposed_offer["Bundle"]) - 1)
+        if(len(proposed_offer["Bundle"])) > 1:
+            prior_utility /= (len(proposed_offer["Bundle"]) - 1)
         lr = self.time**(-2.2)
         buyer_utility = (1 - lr) * current_bid_utility + lr * prior_utility
 
@@ -219,7 +220,8 @@ class Agent:
             total_selling_price += self.selling_price[self.product_list[i]]
             total_cost_price += self.cost_price[self.product_list[i]]
 
-        prior_utility /= (len(product_list) - 1)
+        if(len(product_list) > 1):
+            prior_utility /= (len(product_list) - 1)
 
         initial_discount = min((1-prior_utility), self.max_initial_discount_rate)*(total_selling_price - total_cost_price)
         initial_offer = {"Bundle" : product_list, "Cost" : total_selling_price - initial_discount + self.selling_price[self.product_list[product_idx]], "Accepted" : False}

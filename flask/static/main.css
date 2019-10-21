@@ -42,3 +42,7 @@ td {
 .form {
     margin-top: 20px;
 }
+
+.right {
+    overflow: scroll;
+}

@@ -8,7 +8,7 @@
 <div class="content">
     <div class="container">
         <div class="row">
-            <div class="col-lg-6 col-md-6 col-sm-12">
+            <div class="left">
                 <h1>Bargain</h1>
                 Price of {{product_list[offer['Bundle'][-1]]}} : <b>Rs. {{ selling_price[product_list[offer['Bundle'][-1]]] }}</b><br><br>
                 People who buy {{product_list[offer['Bundle'][-1]]}} also buy
@@ -31,7 +31,7 @@
                 <div class="form">
                     <form action="/negotiate/{{product_list[offer['Bundle'][-1]]}}" method="POST">
                     {% for idx in possible_items %}
-                        <input type="checkbox" id={{idx}} name={{idx}}>
+                        <input type="checkbox" id={{idx}} name={{idx}} checked="True">
                         <label for={{idx}}>{{product_list[idx]}}  (Rs.{{selling_price[product_list[idx]]}})</label>
                         <br>
                     {% endfor %}
@@ -41,7 +41,7 @@
                     </form>
                 </div>
             </div>
-            <div class="col-lg-6 col-md-6 col-sm-12">
+            <div class="right" id="offerhistory">
                 <h1>Offer History</h1>
                 <ol>
                 {% for i in range(0, offer_history|count - 1, 2) %}
