@@ -18,26 +18,26 @@ items = ["Smartphone",      \
          "Crayons"          ]
 
 # The selling price of each item in the dataset
-selling_price = {"Smartphone" : 5000,    \
-        "Phone Case" : 300,     \
-        "Screen Guard" : 150,   \
-        "Laptop" : 15000,       \
-        "Mouse" : 500,          \
-        "Keyboard" : 750,       \
-        "Smart TV" : 10000,     \
-        "Firestick" : 4000,     \
+selling_price = {"Smartphone" : 10000,    \
+        "Phone Case" : 500,     \
+        "Screen Guard" : 200,   \
+        "Laptop" : 40000,       \
+        "Mouse" : 2000,          \
+        "Keyboard" : 3000,       \
+        "Smart TV" : 30000,     \
+        "Firestick" : 5000,     \
         "Color Book" : 200,     \
         "Crayons" : 400         }
 
 # The cost price of each item in the dataset
 cost_price = {"Smartphone" : 4000,    \
-        "Phone Case" : 200,     \
-        "Screen Guard" : 100,   \
+        "Phone Case" : 100,     \
+        "Screen Guard" : 50,   \
         "Laptop" : 10000,       \
-        "Mouse" : 300,          \
-        "Keyboard" : 500,       \
-        "Smart TV" : 7000,     \
-        "Firestick" : 2500,     \
+        "Mouse" : 500,          \
+        "Keyboard" : 750,       \
+        "Smart TV" : 7500,     \
+        "Firestick" : 1000,     \
         "Color Book" : 50,     \
         "Crayons" : 100         }
 

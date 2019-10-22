@@ -8,7 +8,7 @@
 <div class="content">
     <div class="container">
         <div class="row">
-            <div class="left">
+            <div class="col-lg-6 col-md-6  col-sm-12">
                 <h1>Bargain</h1>
                 Price of {{product_list[offer['Bundle'][-1]]}} : <b>Rs. {{ selling_price[product_list[offer['Bundle'][-1]]] }}</b><br><br>
                 People who buy {{product_list[offer['Bundle'][-1]]}} also buy
@@ -41,7 +41,7 @@
                     </form>
                 </div>
             </div>
-            <div class="right" id="offerhistory">
+            <div class="col-lg-6 col-md-6  col-sm-12">
                 <h1>Offer History</h1>
                 <ol>
                 {% for i in range(0, offer_history|count - 1, 2) %}
