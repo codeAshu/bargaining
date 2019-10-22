@@ -378,6 +378,9 @@ def getOffer(agent, buyer, recommender, selling_price, product_list, proposed_of
         agent.prev_agent_offers_list.append(prev_offer)
         buyer_utility = min(1, agent.opponentModel(proposed_offer, recommender))
         agent_utility = agent.utility(proposed_offer, recommender)
+        if(agent_utility <= 0):
+            return prev_offer
+            
         print("Agent Utility : ", agent_utility)
         print("Buyer Utility : ", buyer_utility)
         # Use the TKI method from Koley's/Fujita's paper to provide a new offer
