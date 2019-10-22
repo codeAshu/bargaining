@@ -25,13 +25,17 @@
                 </div><br>
                 <div class="btn-group" style="width:100%">
                     <button onclick="window.location.href='/accept/{{ product_names }}/1/{{ offer['Cost'] }}/{{ amount_saved }}'" style="width:50%">Accept</button>
-                    <button onclick="window.location.href='/accept/{{ product_list[offer['Bundle'][-1]] }}/0/0.0/0.0'" style="width:50%">Reject</button>
+                    <button onclick="window.location.href='/accept/{{ product_list[offer['Bundle'][-1]] }}/0/0/0'" style="width:50%">Reject</button>
                 </div><br><br>
                 <h2>New Offer : </h2>
                 <div class="form">
                     <form action="/negotiate/{{product_list[offer['Bundle'][-1]]}}" method="POST">
                     {% for idx in possible_items %}
-                        <input type="checkbox" id={{idx}} name={{idx}} checked="True">
+                        {% if idx in offer["Bundle"] %}
+                            <input type="checkbox" id={{idx}} name={{idx}} checked="True">
+                        {% else %}
+                            <input type="checkbox" id={{idx}} name={{idx}}>
+                        {% endif %}
                         <label for={{idx}}>{{product_list[idx]}}  (Rs.{{selling_price[product_list[idx]]}})</label>
                         <br>
                     {% endfor %}
