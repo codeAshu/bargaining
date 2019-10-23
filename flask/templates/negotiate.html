@@ -14,7 +14,7 @@
                 People who buy {{product_list[offer['Bundle'][-1]]}} also buy
                 <ol>
                 {% for idx in offer['Bundle'][:-1] %}
-                    <li>{{product_list[idx]}}</li>
+                    <li>{{product_list[idx]}} : Rs. {{ selling_price[product_list[idx]] }}</li>
                 {% endfor %}
                 </ol>
                 <div class="offer">
@@ -30,6 +30,7 @@
                 <h2>New Offer : </h2>
                 <div class="form">
                     <form action="/negotiate/{{product_list[offer['Bundle'][-1]]}}" method="POST">
+                    Buy {{ product_list[offer["Bundle"][-1]] }} with -<br>
                     {% for idx in possible_items %}
                         {% if idx in offer["Bundle"] %}
                             <input type="checkbox" id={{idx}} name={{idx}} checked="True">
@@ -49,14 +50,14 @@
                 <h1>Offer History</h1>
                 <ol>
                 {% for i in range(0, offer_history|count - 1, 2) %}
-                    <li>Agent - {{ offer_history[i]["Cost"] }} - 
+                    <li>Agent - Rs. {{ offer_history[i]["Cost"] }} - 
                         <ul>
                             {% for idx in offer_history[i]['Bundle'] %}
                                 <li>{{ product_list[idx] }}</li>
                             {% endfor %}
                         </ul>
                     </li>
-                    <li>You - {{ offer_history[i+1]["Cost"] }} - 
+                    <li>You - Rs. {{ offer_history[i+1]["Cost"] }} - 
                         <ul>
                             {% for idx in offer_history[i+1]['Bundle'] %}
                                 <li>{{ product_list[idx] }}</li>
