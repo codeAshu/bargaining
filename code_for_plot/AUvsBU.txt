@@ -1,0 +1,10 @@
+set terminal pngcairo font 'Times New Roman, 36.0' size 1366,768
+unset key
+set termopt enhanced
+set datafile separator ","
+set xlabel 'Agent Utility U_{A}'
+set xrange [0:1]
+set yrange [0:1.1]
+set ylabel 'Buyer Utility U_{B}'
+set output 'C:\Users\anant\Desktop\bargaining\results_plots\AUvsBU.png'
+plot 'C:\Users\anant\Desktop\bargaining\results_for_plot.csv' using 3:4 pointtype 7 linecolor 0 pointsize 2

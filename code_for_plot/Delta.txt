@@ -1,0 +1,10 @@
+set terminal pngcairo font 'Times New Roman, 36.0' size 1366,768
+set encoding utf8
+unset key
+set xlabel 'Iteration t'
+set ylabel 'Decay Factor δ'
+set xrange [0:10]
+set yrange [0:1.1]
+set samples 10
+set output 'C:\Users\anant\Desktop\bargaining\results_plots\Delta.png'
+plot [0:9] x **(-2.2) with linespoints linetype 1 linecolor 0 linewidth 3 pointtype 7 pointsize 2
