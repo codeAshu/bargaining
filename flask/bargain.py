@@ -161,6 +161,7 @@ class Agent:
         if not np.array_equal(sorted(prev_offer["Bundle"]), sorted(proposed_offer["Bundle"])):
             max_cost = int(self.getInitialOffer(proposed_offer["Bundle"], recommender)["Cost"])
 
+        bidding_distance = 0.05
         offered_price = proposed_offer["Cost"]
         # offered_price - (max_cost - offered_price)
         start_offer_price = max(0, 2*offered_price - max_cost)
@@ -170,8 +171,8 @@ class Agent:
 
         reasonable_bid_space = []
         for bid in bid_space:
-            agent_utility = self.utility(proposed_offer, recommender)
-            if abs(agent_utility - target_utility) <= 0.05:
+            agent_utility = self.utility(bid, recommender)
+            if abs(agent_utility - target_utility) <= bidding_distance:
                 reasonable_bid_space.append(bid)
 
         return bid_space
@@ -367,7 +368,7 @@ def getOffer(agent, buyer, recommender, selling_price, product_list, proposed_of
     '''
 
     # prev_offer is None when negotiation has not begun
-    if  not prev_offer:
+    if not prev_offer:
         product_idx = proposed_offer["Bundle"][-1]
         initial_item_idx = recommender.getListOfPossibleItems(product_idx)
         initial_offer = agent.getInitialOffer(np.append(initial_item_idx, product_idx), recommender)
@@ -383,7 +384,6 @@ def getOffer(agent, buyer, recommender, selling_price, product_list, proposed_of
             
         print("Agent Utility : ", agent_utility)
         print("Buyer Utility : ", buyer_utility)
-        # Use the TKI method from Koley's/Fujita's paper to provide a new offer
         target_utility = agent.TKI(buyer_utility, agent_utility)
         print("Target Utility : ", target_utility)
         bid_space = agent.getBidSpace(proposed_offer, target_utility, recommender, prev_offer)
