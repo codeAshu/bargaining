@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Bargain</title>
+{% endblock %}
+
+{% block body %}
+<div class="content">
+    <h1>Offer Accepted</h1>
+    Proceeding to payment with
+    <ol>
+    <li>{{ product_list[product_idx] }}</li>
+    {% for product in product_names.split(',') %}
+    <li>{{ product }}</li>
+    {% endfor %}
+    </ol>
+    <br>
+    Amount Saved = <b>Rs. {{ amount_saved }}</b><br>
+    To Pay = <b>Rs. {{ cost }}</b>
+</div>
+{% endblock %}
