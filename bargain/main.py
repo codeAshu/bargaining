@@ -101,7 +101,7 @@ class AppReloader(object):
         app = self.get_application()
         return app(environ, start_response)
 
-application = AppReloader(get_app)
+app = AppReloader(get_app)
 
 if __name__ == "__main__":
     run_simple('localhost', 8080, application,
