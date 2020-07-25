@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, request
+from flask import Flask, render_template, request
 import bargain as bg
 from werkzeug.serving import run_simple
 
@@ -104,5 +104,5 @@ class AppReloader(object):
 application = AppReloader(get_app)
 
 if __name__ == "__main__":
-    run_simple('localhost', 5000, application,
+    run_simple('localhost', 8080, application,
                use_reloader=True, use_debugger=True, use_evalex=True)

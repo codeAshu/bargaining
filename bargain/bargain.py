@@ -1,11 +1,11 @@
 import numpy as np
-import pandas as pd
-import random
-import pickle
+import cPickle as pickle
 import math
 
+
 class Agent:
-    def __init__(self, product_list, cost_price, selling_price, max_initial_discount_rate = 0.1, min_profit_margin = 0.3, num_rounds = 0.6):
+    def __init__(self, product_list, cost_price, selling_price, max_initial_discount_rate=0.1, min_profit_margin=0.3,
+                 num_rounds=0.6):
         self.first_offer_value = -1
         self.product_list = product_list
         self.cost_price = cost_price
@@ -24,11 +24,9 @@ class Agent:
 
         '''
         The Opponent Model in the BOA System
-
         Parameters:
             proposed_offer  - proposed offer by the buyer
             recommender     - the recommendation system used by the agent
-
         Returns:
             buyer_utility   - the buyer utility of proposed_offer
         '''
@@ -36,24 +34,41 @@ class Agent:
         # the index of the product the buyer wishes to buy
         product_idx = proposed_offer["Bundle"][-1]
 
+        print proposed_offer["Bundle"]
+
         total_offered_price = proposed_offer["Cost"]
+
+        # todo ##############################################
         total_selling_price = 0
         for i in proposed_offer["Bundle"]:
             total_selling_price += self.selling_price[self.product_list[i]]
 
-        offer_value = (total_selling_price - total_offered_price) / total_selling_price
+        # todo ->  this is causing zero division error
+        print "selling price", total_selling_price
+        print "offer price", total_offered_price
+
+        offer_value = (total_selling_price - total_offered_price) / float(total_selling_price)
+
+        print "offer value", offer_value
+        print "first offer val", self.first_offer_value
+
         if self.first_offer_value == -1:
             self.first_offer_value = offer_value
 
         current_bid_utility = offer_value / self.first_offer_value
+        # todo ##############################################
+
         prior_utility = 0
         for i in proposed_offer["Bundle"][:-1]:
-            prior_utility += recommender.cooccurance_matrix[product_idx][i] / recommender.cooccurance_matrix[product_idx][product_idx]
+            prior_utility += recommender.cooccurance_matrix[product_idx][i] / \
+                             recommender.cooccurance_matrix[product_idx][product_idx]
 
-        if(len(proposed_offer["Bundle"])) > 1:
+        if (len(proposed_offer["Bundle"])) > 1:
             prior_utility /= (len(proposed_offer["Bundle"]) - 1)
-        lr = self.time**(-2.2)
+        lr = self.time ** (-2.2)
         buyer_utility = (1 - lr) * current_bid_utility + lr * prior_utility
+
+        print "buyer utitlity ", buyer_utility
 
         return buyer_utility
 
@@ -62,7 +77,6 @@ class Agent:
         Parameters:
             proposed_offer  - proposed offer by the buyer
             recommender     - the recommendation system used by the agent
-
         Returns:
             agent utility for the proposed offer
         '''
@@ -83,26 +97,26 @@ class Agent:
         max_profit = total_selling_price - total_cost_price
         agent_utility = profit / max_profit
 
-        initial_profit = self.selling_price[self.product_list[product_idx]] - self.cost_price[self.product_list[product_idx]]
-        self.min_agent_utility = (initial_profit + self.min_profit_margin*(max_profit - initial_profit)) / max_profit
+        initial_profit = self.selling_price[self.product_list[product_idx]] - self.cost_price[
+            self.product_list[product_idx]]
+        self.min_agent_utility = (initial_profit + self.min_profit_margin * (max_profit - initial_profit)) / max_profit
         return agent_utility
 
     def TKI(self, buyer_utility, agent_utility):
 
         '''
         Thomas-Kilmann Conflict Mode Instrument used by the agent to measure the buyer's cooperativeness and assertiveness
-
         Parameters:
             buyer_utility   - buyer utility for the current round
             agent_utility   - agent utility for the current round
-
         Returns:
             target_utility  - the target utility of the offer that the agent should propose
         '''
 
         decay_factor = 1.3
         if len(self.buyer_utility_list) == 0:
-            target_utility = self.min_agent_utility + (1-self.min_agent_utility) * (1 - decay_factor * buyer_utility * min(self.rounds + self.time * 0.1, 1) ** (1 / self.alpha))
+            target_utility = self.min_agent_utility + (1 - self.min_agent_utility) * (
+            1 - decay_factor * buyer_utility * min(self.rounds + self.time * 0.1, 1) ** (1 / self.alpha))
             self.time += 1
             self.buyer_utility_list.append(buyer_utility)
             return target_utility
@@ -136,7 +150,8 @@ class Agent:
                 if self.alpha > 0.3:
                     self.alpha -= 0.25
 
-            target_utility = self.min_agent_utility + (1-self.min_agent_utility) * (1 - decay_factor * buyer_utility * min(self.rounds + self.time * 0.08, 1) ** (1 / self.alpha))
+            target_utility = self.min_agent_utility + (1 - self.min_agent_utility) * (
+            1 - decay_factor * buyer_utility * min(self.rounds + self.time * 0.08, 1) ** (1 / self.alpha))
 
             self.time += 1
             self.buyer_utility_list.append(buyer_utility)
@@ -146,13 +161,11 @@ class Agent:
         '''
         Provides a list of all reasonable bids that can be offered based on the
         target utility function offered by TKI
-
         Parameters:
             proposed_offer  - offer proposed by buyer
             target_utility  - the target utility of the offer that the agent should propose
             recommender     - the recommendation system used by the agent
             prev_offer      - previous offer made by the agent
-
         Returns:
             reasonable_bid_space - list of reasonable bids
         '''
@@ -164,10 +177,10 @@ class Agent:
         bidding_distance = 0.05
         offered_price = proposed_offer["Cost"]
         # offered_price - (max_cost - offered_price)
-        start_offer_price = max(0, 2*offered_price - max_cost)
+        start_offer_price = max(0, 2 * offered_price - max_cost)
         bid_space = []
-        for price in range(start_offer_price, max_cost+1):
-            bid_space.append({"Bundle" : proposed_offer["Bundle"], "Cost" : price})
+        for price in range(start_offer_price, max_cost + 1):
+            bid_space.append({"Bundle": proposed_offer["Bundle"], "Cost": price})
 
         reasonable_bid_space = []
         for bid in bid_space:
@@ -217,17 +230,21 @@ class Agent:
         total_selling_price = 0
         total_cost_price = 0
         for i in product_list[:-1]:
-            prior_utility += recommender.cooccurance_matrix[product_idx][i] / recommender.cooccurance_matrix[product_idx][product_idx]
+            prior_utility += recommender.cooccurance_matrix[product_idx][i] / \
+                             recommender.cooccurance_matrix[product_idx][product_idx]
             total_selling_price += self.selling_price[self.product_list[i]]
             total_cost_price += self.cost_price[self.product_list[i]]
 
-        if(len(product_list) > 1):
+        if (len(product_list) > 1):
             prior_utility /= (len(product_list) - 1)
 
-        initial_discount = min((1-prior_utility), self.max_initial_discount_rate)*(total_selling_price - total_cost_price)
-        initial_offer = {"Bundle" : product_list, "Cost" : total_selling_price - initial_discount + self.selling_price[self.product_list[product_idx]], "Accepted" : False}
+        initial_discount = min((1 - prior_utility), self.max_initial_discount_rate) * (
+        total_selling_price - total_cost_price)
+        initial_offer = {"Bundle": product_list, "Cost": total_selling_price - initial_discount + self.selling_price[
+            self.product_list[product_idx]], "Accepted": False}
 
         return initial_offer
+
 
 class Buyer:
     def __init__(self, no_of_products):
@@ -246,23 +263,24 @@ class Buyer:
         else:
             # bundle changed"
             for idx in proposed_bundle:
-                    self.MOMP_lst[idx] += 1
+                self.MOMP_lst[idx] += 1
 
             for idx in prev_offer["Bundle"]:
                 if idx not in proposed_bundle:
-                    self.MCLP_lst[idx] +=1
+                    self.MCLP_lst[idx] += 1
 
         # Use MOMP, MCLP, lift value for the offered items to calculate the buyer utility
         lift_sum = 0
         for idx in proposed_bundle:
             lift_sum += recommender.lift[product_idx][idx]
 
-        lift_avg = lift_sum/len(proposed_bundle)
+        lift_avg = lift_sum / len(proposed_bundle)
         utility = lift_avg \
-                + sum([self.MOMP_lst[i] for i in proposed_bundle])/len(proposed_bundle) \
-                - sum([self.MCLP_lst[i] for i in proposed_bundle])/len(proposed_bundle)
+                  + sum([self.MOMP_lst[i] for i in proposed_bundle]) / len(proposed_bundle) \
+                  - sum([self.MCLP_lst[i] for i in proposed_bundle]) / len(proposed_bundle)
 
         return utility
+
 
 class RecommenderSystem:
     def __init__(self, cooccurance_matrix):
@@ -279,45 +297,45 @@ class RecommenderSystem:
         return pos
 
     def getListOfPossibleItems(self, product_idx):
-           recommendations = np.argsort(self.cooccurance_matrix[product_idx])[::-1]
-           return recommendations[1:3]
+        recommendations = np.argsort(self.cooccurance_matrix[product_idx])[::-1]
+        return recommendations[1:3]
+
 
 def printMenu(product_list, product_idx, bundle_idx, offer, cost):
-
     '''
     Prints the user interface menu
-
     Parameters:
         product_list    - list of the entire product base
         product_idx     - the index of the product the buyer wishes to buy
         bundle_idx      - list of indices of items in the bundle
         offer           - dictionary of the offer being made
         cost            - list with the cost of the entire product base
-
     Returns:
         None
     '''
 
-    print("\nPeople who buy %s also buy %s" % (product_list[product_idx], ", ".join([product_list[idx] for idx in bundle_idx])))
-    print("\nOffer -> %s along with %s at a cost of %f" % (", ".join([product_list[idx] for idx in bundle_idx]), product_list[product_idx], offer["Cost"]))
-    print("\nTotal amount saved = %f" % (cost[product_list[product_idx]] + sum([cost[product_list[i]] for i in bundle_idx]) - offer["Cost"]))
+    print("\nPeople who buy %s also buy %s" % (
+    product_list[product_idx], ", ".join([product_list[idx] for idx in bundle_idx])))
+    print("\nOffer -> %s along with %s at a cost of %f" % (
+    ", ".join([product_list[idx] for idx in bundle_idx]), product_list[product_idx], offer["Cost"]))
+    print("\nTotal amount saved = %f" % (
+    cost[product_list[product_idx]] + sum([cost[product_list[i]] for i in bundle_idx]) - offer["Cost"]))
+
 
 def getProduct(product_list):
-
     '''
     Get the details of the product that the buyer wishes to buy
-
     Parameters:
         product_list    - list of the entire product base
-
     Returns:
         product_name    - name of the product that the buyer wishes to buy
         product_idx - 1 - index of the product that the buyer wishes to buy
     '''
 
     product_idx = int(input("\nChoose an item between 1 and %d: " % len(product_list)))
-    product_name = product_list[product_idx-1]
-    return product_name, (product_idx-1)
+    product_name = product_list[product_idx - 1]
+    return product_name, (product_idx - 1)
+
 
 def getProductIndex(product_list, product_names):
     product_name_list = product_names.split(',')
@@ -330,14 +348,12 @@ def getProductIndex(product_list, product_names):
                 break
     return idx_lst
 
-def getData():
 
+def getData():
     '''
     Load the product details and list values for the recommender system
-
     Parameters:
         None
-
     Returns:
         product_list        - list of the entire product base
         selling_price       - list with the selling price of the entire product base
@@ -349,11 +365,10 @@ def getData():
 
     return data["items"], data["selling_price"], data["cost_price"], data["cooccurance_matrix"],
 
-def getOffer(agent, buyer, recommender, selling_price, product_list, proposed_offer, prev_offer):
 
+def getOffer(agent, buyer, recommender, selling_price, product_list, proposed_offer, prev_offer):
     '''
     Create a new offer during the negotiation
-
     Parameters:
         agent           - the agent participating in the negotiation
         buyer           - the buyer participating in the negotiation
@@ -362,7 +377,6 @@ def getOffer(agent, buyer, recommender, selling_price, product_list, proposed_of
         product_list    - list of the entire product base
         proposed_offer  - details of the bundle that the user desires
         prev_offer      - previous offer made by the agent
-
     Returns:
         new_offer       - details of the bundle that the agent desires
     '''
@@ -379,9 +393,9 @@ def getOffer(agent, buyer, recommender, selling_price, product_list, proposed_of
         agent.prev_agent_offers_list.append(prev_offer)
         buyer_utility = min(1, agent.opponentModel(proposed_offer, recommender))
         agent_utility = agent.utility(proposed_offer, recommender)
-        if(agent_utility <= 0):
+        if (agent_utility <= 0):
             return prev_offer
-            
+
         print("Agent Utility : ", agent_utility)
         print("Buyer Utility : ", buyer_utility)
         target_utility = agent.TKI(buyer_utility, agent_utility)
@@ -391,11 +405,10 @@ def getOffer(agent, buyer, recommender, selling_price, product_list, proposed_of
         agent.prev_agent_offers_utility_list.append(agent.utility(new_offer, recommender))
         return new_offer
 
-def negotiation2(agent, buyer, cooccurance_matrix, product_list, selling_price, product_idx):
 
+def negotiation2(agent, buyer, cooccurance_matrix, product_list, selling_price, product_idx):
     '''
     The logic of the negotiation and its flow
-
     Parameters:
         agent               - the agent participating in the negotiation
         buyer               - the buyer participating in the negotiation
@@ -403,28 +416,29 @@ def negotiation2(agent, buyer, cooccurance_matrix, product_list, selling_price, 
         product_list        - list of the entire product base
         selling_price       - list with the selling price of the entire product base
         product_idx         - index of the product that the buyer wishes to buy
-
     Returns:
         None
     '''
 
     recommender = RecommenderSystem(cooccurance_matrix)
     offer = None
-    proposed_offer = {"Bundle" : [product_idx], "Cost" : None}
+    proposed_offer = {"Bundle": [product_idx], "Cost": None}
     accept = False
     reject = False
     while not accept and not reject:
         offer = getOffer(agent, buyer, recommender, selling_price, product_list, proposed_offer, offer)
         bundle_idx = offer["Bundle"][:-1]
         if offer["Accepted"]:
-            print("Accepted. Proceeding to payment with %s and %s" % (product_list[product_idx], ", ".join([product_list[idx] for idx in bundle_idx])))
+            print("Accepted. Proceeding to payment with %s and %s" % (
+            product_list[product_idx], ", ".join([product_list[idx] for idx in bundle_idx])))
             accept = True
         else:
             printMenu(product_list, product_idx, bundle_idx, offer, selling_price)
             while True:
                 inp = int(input("\nType -> 1 : Accept, 2 : Reject, 3 : New offer\n"))
                 if inp == 1:
-                    print("Thank You. Proceeding to payment with %s and %s" % (product_list[product_idx], ", ".join([product_list[idx] for idx in bundle_idx])))
+                    print("Thank You. Proceeding to payment with %s and %s" % (
+                    product_list[product_idx], ", ".join([product_list[idx] for idx in bundle_idx])))
                     accept = True
                     break
                 elif inp == 2:
@@ -436,9 +450,12 @@ def negotiation2(agent, buyer, cooccurance_matrix, product_list, selling_price, 
                     print(product_list[product_idx], " Price => Rs.", selling_price[product_list[product_idx]])
                     print("Possible items : ")
                     for i in range(len(possible_items_idx)):
-                        print(i+1, " : ", product_list[possible_items_idx[i]], " Price => Rs.", selling_price[product_list[possible_items_idx[i]]])
-                    proposed_item_idx = input("Enter new items: number between 1 and %d(other than product index): " % len(possible_items_idx))
-                    proposed_item_idx = [possible_items_idx[int(i)-1] for i in proposed_item_idx.split(" ")]
+                        print(i + 1, " : ", product_list[possible_items_idx[i]], " Price => Rs.",
+                              selling_price[product_list[possible_items_idx[i]]])
+                    proposed_item_idx = input(
+                        "Enter new items: number between 1 and %d(other than product index): " % len(
+                            possible_items_idx))
+                    proposed_item_idx = [possible_items_idx[int(i) - 1] for i in proposed_item_idx.split(" ")]
 
                     proposed_cost = int(input("Enter cost of the new bundle: "))
                     proposed_offer["Bundle"] = np.append(proposed_item_idx, product_idx)
@@ -449,11 +466,10 @@ def negotiation2(agent, buyer, cooccurance_matrix, product_list, selling_price, 
 
         first_offer = False
 
-def negotiation(agent, buyer, cooccurance_matrix, product_list, selling_price, product_idx, offer, proposed_offer):
 
+def negotiation(agent, buyer, cooccurance_matrix, product_list, selling_price, product_idx, offer, proposed_offer):
     '''
     The logic of the negotiation and its flow
-
     Parameters:
         agent               - the agent participating in the negotiation
         buyer               - the buyer participating in the negotiation
@@ -461,7 +477,6 @@ def negotiation(agent, buyer, cooccurance_matrix, product_list, selling_price, p
         product_list        - list of the entire product base
         selling_price       - list with the selling price of the entire product base
         product_idx         - index of the product that the buyer wishes to buy
-
     Returns:
         None
     '''
@@ -470,9 +485,10 @@ def negotiation(agent, buyer, cooccurance_matrix, product_list, selling_price, p
     offer = getOffer(agent, buyer, recommender, selling_price, product_list, proposed_offer, offer)
     return offer
 
+
 if __name__ == "__main__":
     product_list, selling_price, cost_price, cooccurance_matrix = getData()
     product_name, product_idx = getProduct(product_list)
-    agent = Agent(product_list, cost_price, selling_price, max_initial_discount_rate=0.3, min_profit_margin = 0.3)
+    agent = Agent(product_list, cost_price, selling_price, max_initial_discount_rate=0.3, min_profit_margin=0.3)
     buyer = Buyer(len(product_list))
     negotiation2(agent, buyer, cooccurance_matrix, product_list, selling_price, product_idx)
